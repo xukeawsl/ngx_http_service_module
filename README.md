@@ -94,3 +94,31 @@ http {
     }
 }
 ```
+
+## 服务接口开发
+* 用户需要在项目中包含 `ngx_http_service_interface.h` 接口文件
+```c
+// 接口形如下面的函数
+
+#include "ngx_http_service_interface.h"
+#include "cJSON.h"
+
+void srv_sayHello(const ngx_request_t *rqst, ngx_request_t *resp)
+{
+    // do something...
+}
+```
+
+* 请求/响应结构
+```c
+// 请求结构只包含一个 const char * 指针指向 json 请求字符串
+struct ngx_json_request_s {
+    const char *data;
+};
+
+// 响应结构包含一个 char * 指针指向 json 响应字符串和一个回调函数用于释放响应字符串的内存
+struct ngx_json_response_s {
+    char *data;
+    void (*release)(void *);
+};
+```
