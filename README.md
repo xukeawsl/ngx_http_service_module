@@ -1,5 +1,6 @@
 # Nginx 服务处理模块
 
+[![License](https://img.shields.io/npm/l/mithril.svg)](https://github.com/xukeawsl/ngx_http_service_module/blob/master/LICENSE)
 
 ## 先决条件
 * Linux 平台
@@ -44,3 +45,52 @@ make
 make install
 ```
 
+## 配置指令
+
+### 1. module_path (只能在 http 块配置)
+* 此指令配置动态库所属路径, 如果未配置则安装默认搜索路径搜索
+* 第一个参数为路径, 后面跟动态库文件名(全名)
+```
+module_path {
+    /path/to/dir1    module1.so;
+    /path/to/dir2    module2.so  module3.so;
+}
+```
+
+### 2. module_dependency (只能在 http 块配置)
+* 此配置设置动态库之间的依赖关系
+* 第一个参数是被依赖的动态库, 后面跟它依赖的动态库
+```
+module_dependency {
+    module1.so     module2.so;
+    module3.so     module2.so  libjsoncpp.so;
+}
+```
+
+### 3. service (只能在 http 块配置)
+* 此配置设置模块提供的服务
+* 第一个参数是动态库文件名, 后面为动态库提供的服务名(大小写敏感)
+* 服务名需要全局唯一
+```
+service {
+    module1.so    srv_echo  srv_datetime;
+    module2.so    srv_sayHello;
+    module3.so    srv_getSum;
+}
+```
+
+### 4. service_mode (http、server、location 块均可配置)
+* 用于启用模块功能, 未启用的部分不进行服务处理
+* 默认不启用, 以下示例在指定服务器上全局启用, 但是对于 `/test` 的路由请求不处理
+```
+http {
+
+    server {
+        sevice_mode on;
+
+        location /test {
+            service_mode off;
+        }
+    }
+}
+```
