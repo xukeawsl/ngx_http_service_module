@@ -130,6 +130,6 @@ struct ngx_json_response_s {
 ```bash
 curl -X POST "http://localhost/service_test" \
 -H 'Content-Type: application/json' \
--H 'Service-Name" srv_sayHello' \
+-H 'Service-Name: srv_sayHello' \
 -d '{"data": "xxxx"}'
 ```
