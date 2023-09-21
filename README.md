@@ -122,3 +122,14 @@ struct ngx_json_response_s {
     void (*release)(void *);
 };
 ```
+
+## 服务调用规则
+* 通过 http 头 `Service-Name` 的值来指定调用的服务
+* `Content-Type` 必须为 `json` 类型
+* 如下, 调用 `srv_sayHello` 服务
+```bash
+curl -X POST "http://localhost/service_test" \
+-H 'Content-Type: application/json' \
+-H 'Service-Name" srv_sayHello' \
+-d '{"data": "xxxx"}'
+```
