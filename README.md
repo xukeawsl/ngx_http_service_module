@@ -8,7 +8,7 @@
 * 已安装 Nginx 编译所需工具
 
 ## 模块特性
-* 服务请求/响应报文均为 `json` 格式, 默认将 `cJSON` 库编译进去了, 业务开发人员可以使用其进行报文解析/打包, 当然也可以使用其他的 `json` 解析库
+* 服务请求/响应报文均为 `json` 格式, 默认将 `cJSON` 库编译进去了, 业务开发人员可以使用其进行报文解析/打包, 当然也可以使用其他的 `json` 解析库(见 `example/third_test` 部分)
 * 通过实现特定接口, 将服务编译成动态库加载到 Nginx 中
 
 ## 优点
@@ -50,7 +50,7 @@ make install
 ### 1. module_path (只能在 http 块配置)
 * 此指令配置动态库所属路径, 如果未配置则安装默认搜索路径搜索
 * 第一个参数为路径, 后面跟动态库文件名(全名)
-```
+```nginx
 module_path {
     /path/to/dir1    module1.so;
     /path/to/dir2    module2.so  module3.so;
@@ -60,7 +60,7 @@ module_path {
 ### 2. module_dependency (只能在 http 块配置)
 * 此配置设置动态库之间的依赖关系
 * 第一个参数是被依赖的动态库, 后面跟它依赖的动态库
-```
+```nginx
 module_dependency {
     module1.so     module2.so;
     module3.so     module2.so  libjsoncpp.so;
@@ -71,7 +71,7 @@ module_dependency {
 * 此配置设置模块提供的服务
 * 第一个参数是动态库文件名, 后面为动态库提供的服务名(大小写敏感)
 * 服务名需要全局唯一
-```
+```nginx
 service {
     module1.so    srv_echo  srv_datetime;
     module2.so    srv_sayHello;
@@ -82,7 +82,7 @@ service {
 ### 4. service_mode (http、server、location 块均可配置)
 * 用于启用模块功能, 未启用的部分不进行服务处理
 * 默认不启用, 以下示例在指定服务器上全局启用, 但是对于 `/test` 的路由请求不处理
-```
+```nginx
 http {
 
     server {
@@ -117,6 +117,7 @@ struct ngx_json_request_s {
 };
 
 // 响应结构包含一个 char * 指针指向 json 响应字符串和一个回调函数用于释放响应字符串的内存
+// 因为对于 c++ 实现的服务可能使用 new 来分配内存, 那就需要指定正确的内存释放方式
 struct ngx_json_response_s {
     char *data;
     void (*release)(void *);
@@ -124,6 +125,7 @@ struct ngx_json_response_s {
 ```
 
 ## 服务调用规则
+* 请求方法要求为 `POST`
 * 通过 http 头 `Service-Name` 的值来指定调用的服务
 * `Content-Type` 必须为 `json` 类型
 * 如下, 调用 `srv_sayHello` 服务
